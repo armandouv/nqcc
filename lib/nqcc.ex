@@ -4,6 +4,7 @@ defmodule Nqcc do
   """
   @commands %{
     "help" => "Prints this help",
+    "A" => "Prints all compiling stages' output",
     "sn" => "Prints sanitizer output",
     "l" => "Prints scanner output",
     "p" => "Prints parser output",
@@ -17,7 +18,7 @@ defmodule Nqcc do
   end
 
   def parse_args(args) do
-    OptionParser.parse(args, strict: [help: :boolean, l: :boolean, p: :boolean, s: :boolean, sn: :boolean])
+    OptionParser.parse(args, strict: [help: :boolean, l: :boolean, p: :boolean, s: :boolean, sn: :boolean, A: :boolean])
   end
 
   defp process_args({[help: true], _, _}) do
@@ -26,6 +27,10 @@ defmodule Nqcc do
 
   defp process_args({parsed, [file_name], _}) do
     flags = for {flag_name, _} <- parsed, into: MapSet.new, do: flag_name
+    flags = cond do
+        :A in flags -> MapSet.new([:sn, :l, :p, :s])
+        true -> flags
+      end
     compile_file(file_name, flags)
   end
 
