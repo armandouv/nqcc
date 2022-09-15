@@ -30,11 +30,11 @@ defmodule Nqcc do
 
     File.read!(file_path)
     |> Sanitizer.sanitize_source()
-    |> IO.inspect(label: "\nSanitizer ouput")
+    |> IO.inspect(label: "\nSanitizer output")
     |> Lexer.scan_words()
-    |> IO.inspect(label: "\nLexer ouput")
+    |> IO.inspect(label: "\nLexer output")
     |> Parser.parse_program()
-    |> IO.inspect(label: "\nParser ouput")
+    |> IO.inspect(label: "\nParser output")
     |> CodeGenerator.generate_code()
     |> Linker.generate_binary(assembly_path)
   end
@@ -42,7 +42,7 @@ defmodule Nqcc do
   defp print_help_message do
     IO.puts("\nnqcc --help file_name \n")
 
-    IO.puts("\nThe compiler supports following options:\n")
+    IO.puts("\nThe compiler supports the following options:\n")
 
     @commands
     |> Enum.map(fn {command, description} -> IO.puts("  #{command} - #{description}") end)
