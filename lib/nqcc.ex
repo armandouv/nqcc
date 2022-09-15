@@ -3,7 +3,10 @@ defmodule Nqcc do
   Documentation for Nqcc.
   """
   @commands %{
-    "help" => "Prints this help"
+    "help" => "Prints this help",
+    "l" => "Displays scanner output",
+    "p" => "Displays parser output",
+    "s" => "Displays code generator output"
   }
 
   def main(args) do
