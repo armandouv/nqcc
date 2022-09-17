@@ -6,6 +6,7 @@ defmodule Nqcc do
     "help" => "Prints this help"
   }
 
+  @spec main([binary]) :: :ok | list
   def main(args) do
     args
     |> parse_args
@@ -26,22 +27,10 @@ defmodule Nqcc do
 
   defp compile_file(file_path) do
     IO.puts("Compiling file: " <> file_path)
-    assembly_path = String.replace_trailing(file_path, ".c", ".s")
-
-    File.read!(file_path)
-    |> Sanitizer.sanitize_source()
-    |> IO.inspect(label: "\nSanitizer ouput")
-    |> Lexer.scan_words()
-    |> IO.inspect(label: "\nLexer ouput")
-    |> Parser.parse_program()
-    |> IO.inspect(label: "\nParser ouput")
-    |> CodeGenerator.generate_code()
-    |> Linker.generate_binary(assembly_path)
   end
 
   defp print_help_message do
-    IO.puts("\nnqcc --help file_name \n")
-
+    IO.puts("\nqcc --help file_name \n")
     IO.puts("\nThe compiler supports following options:\n")
 
     @commands
