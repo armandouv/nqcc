@@ -1,6 +1,11 @@
 defmodule Lexer do
   def scan_words(words) do
-    Enum.flat_map(words, &lex_raw_tokens/1)
+    tokens = Enum.flat_map(words, &lex_raw_tokens/1)
+    if :error in tokens do
+      :error
+    else
+      tokens
+    end
   end
 
   def get_constant(program) do
@@ -8,8 +13,9 @@ defmodule Lexer do
       [value] ->
         {{:constant, String.to_integer(value)}, String.trim_leading(program, value)}
 
-      program ->
-        {:error, "Token not valid: #{program}"}
+      _ ->
+        IO.puts("Invalid token: #{program}")
+        {:error, ""}
     end
   end
 
@@ -40,8 +46,8 @@ defmodule Lexer do
         "main" <> rest ->
           {:main_keyword, rest}
 
-        rest ->
-          get_constant(rest)
+        _ ->
+          get_constant(program)
       end
 
     if token != :error do
