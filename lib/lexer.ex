@@ -1,11 +1,6 @@
 defmodule Lexer do
   def scan_words(words) do
-    tokens = Enum.flat_map(words, &lex_raw_tokens/1)
-    if :error in tokens do
-      :error
-    else
-      tokens
-    end
+    Enum.flat_map(words, &lex_raw_tokens/1)
   end
 
   def get_constant(program) do
