@@ -53,16 +53,20 @@ defmodule Nqcc do
     IO.puts("Compiling file: " <> file_path)
     assembly_path = String.replace_trailing(file_path, ".c", ".s")
 
-    File.read!(file_path)
+    parser_output = File.read!(file_path)
     |> Sanitizer.sanitize_source()
     |> inspect_output(flags, :sn, "\nSanitizer output")
     |> Lexer.scan_words()
     |> inspect_output(flags, :l, "\nLexer output")
     |> Parser.parse_program()
-    |> inspect_output(flags, :p, "\nParser output")
-    |> CodeGenerator.generate_code()
-    |> inspect_output(flags, :s, "\nCode generator output")
-    |> Linker.generate_binary(assembly_path)
+
+    if parser_output != :error do
+      parser_output
+      |> inspect_output(flags, :p, "\nParser output")
+      |> CodeGenerator.generate_code()
+      |> inspect_output(flags, :s, "\nCode generator output")
+      |> Linker.generate_binary(assembly_path)
+    end
   end
 
   defp print_help_message do
