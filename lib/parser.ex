@@ -2,7 +2,7 @@ defmodule Parser do
   def parse_program(token_list) do
     function = parse_function(token_list)
 
-    case function do
+    result = case function do
       {{:error, error_message}, _rest} ->
         {:error, error_message}
 
@@ -12,6 +12,14 @@ defmodule Parser do
         else
           {:error, "Error: there are more elements after function end"}
         end
+    end
+
+    case result do
+      {:error, error_message} ->
+        IO.puts(error_message)
+        :error
+
+      _ -> result
     end
   end
 

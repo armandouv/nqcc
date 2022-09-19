@@ -8,8 +8,9 @@ defmodule Lexer do
       [value] ->
         {{:constant, String.to_integer(value)}, String.trim_leading(program, value)}
 
-      program ->
-        {:error, "Token not valid: #{program}"}
+      _ ->
+        IO.puts("Invalid token: #{program}")
+        {:error, ""}
     end
   end
 
@@ -40,8 +41,8 @@ defmodule Lexer do
         "main" <> rest ->
           {:main_keyword, rest}
 
-        rest ->
-          get_constant(rest)
+        _ ->
+          get_constant(program)
       end
 
     if token != :error do
