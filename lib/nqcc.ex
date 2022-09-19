@@ -50,7 +50,6 @@ defmodule Nqcc do
   end
 
   defp compile_file(file_path, flags) do
-    IO.puts("Compiling file: " <> file_path)
     assembly_path = String.replace_trailing(file_path, ".c", ".s")
 
     parser_output = File.read!(file_path)
