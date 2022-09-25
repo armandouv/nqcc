@@ -82,7 +82,7 @@ defmodule Nqcc do
   end
 
   defp print_help_message do
-    IO.puts("\nqcc --help file_name \n")
+    IO.puts("\nnqcc --help file_name \n")
     IO.puts("\nThe compiler supports the following options:\n")
 
     @commands
