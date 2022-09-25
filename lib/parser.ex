@@ -2,7 +2,7 @@ defmodule Parser do
   def parse_program(token_list) do
     function = parse_function(token_list)
 
-    case function do
+    result = case function do
       {{:error, error_message}, _rest} ->
         {:error, error_message}
 
@@ -12,6 +12,14 @@ defmodule Parser do
         else
           {:error, "Error: there are more elements after function end"}
         end
+    end
+
+    case result do
+      {:error, error_message} ->
+        IO.puts(error_message)
+        :error
+
+      _ -> result
     end
   end
 
@@ -35,27 +43,25 @@ defmodule Parser do
                 {{:error, error_message}, rest} ->
                   {{:error, error_message}, rest}
 
-                {statement_node, [next_token | rest]} ->
-                  if next_token == :close_brace do
-                    {%AST{node_name: :function, value: :main, left_node: statement_node}, rest}
-                  else
-                    {{:error, "Error, close brace missed"}, rest}
-                  end
+                {statement_node, [:close_brace | rest]} ->
+                  {%AST{node_name: :function, value: :main, left_node: statement_node}, rest}
+
+                {_statement_node, remaining_tokens} -> {{:error, "Error: close brace missed"}, remaining_tokens}
               end
             else
               {:error, "Error: open brace missed"}
             end
           else
-            {:error, "Error: close parentesis missed"}
+            {:error, "Error: close parenthesis missed"}
           end
         else
-          {:error, "Error: open parentesis missed"}
+          {:error, "Error: open parenthesis missed"}
         end
       else
-        {:error, "Error: main functionb missed"}
+        {:error, "Error: main function missed"}
       end
     else
-      {:error, "Error, return type value missed"}
+      {:error, "Error: return type value missed"}
     end
   end
 

@@ -8,8 +8,9 @@ defmodule Lexer do
       [value] ->
         {{:constant, String.to_integer(value)}, String.trim_leading(program, value)}
 
-      program ->
-        {:error, "Token not valid: #{program}"}
+      _ ->
+        IO.puts("Invalid token: #{program}")
+        {:error, ""}
     end
   end
 
@@ -31,17 +32,19 @@ defmodule Lexer do
         ";" <> rest ->
           {:semicolon, rest}
 
-        "return" <> rest ->
-          {:return_keyword, rest}
+        # Debe haber un espacio forzosamente despues de las palabras reservadas return e int.
+        # Por lo tanto, el sanitizer debio de haber separado la cadena por el espacio.
+        "return" ->
+          {:return_keyword, ""}
 
-        "int" <> rest ->
-          {:int_keyword, rest}
+        "int" ->
+          {:int_keyword, ""}
 
         "main" <> rest ->
           {:main_keyword, rest}
 
-        rest ->
-          get_constant(rest)
+        _ ->
+          get_constant(program)
       end
 
     if token != :error do
