@@ -32,11 +32,13 @@ defmodule Lexer do
         ";" <> rest ->
           {:semicolon, rest}
 
-        "return" <> rest ->
-          {:return_keyword, rest}
+        # Debe haber un espacio forzosamente despues de las palabras reservadas return e int.
+        # Por lo tanto, el sanitizer debio de haber separado la cadena por el espacio.
+        "return" ->
+          {:return_keyword, ""}
 
-        "int" <> rest ->
-          {:int_keyword, rest}
+        "int" ->
+          {:int_keyword, ""}
 
         "main" <> rest ->
           {:main_keyword, rest}
