@@ -43,12 +43,10 @@ defmodule Parser do
                 {{:error, error_message}, rest} ->
                   {{:error, error_message}, rest}
 
-                {statement_node, [next_token | rest]} ->
-                  if next_token == :close_brace do
-                    {%AST{node_name: :function, value: :main, left_node: statement_node}, rest}
-                  else
-                    {{:error, "Error, close brace missed"}, rest}
-                  end
+                {statement_node, [:close_brace | rest]} ->
+                  {%AST{node_name: :function, value: :main, left_node: statement_node}, rest}
+
+                {_statement_node, remaining_tokens} -> {{:error, "Error: close brace missed"}, remaining_tokens}
               end
             else
               {:error, "Error: open brace missed"}
