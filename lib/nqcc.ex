@@ -3,7 +3,7 @@ defmodule Nqcc do
   Documentation for Nqcc.
   """
   @commands %{
-    "help" => "Prints this help",
+    "help" => "Prints this help message",
     "A" => "Prints all compiling stages' output",
     "sn" => "Prints sanitizer output",
     "l" => "Prints scanner output",
@@ -28,7 +28,7 @@ defmodule Nqcc do
   defp process_args({parsed, [file_name], _}) do
     flags = for {flag_name, _} <- parsed, into: MapSet.new, do: flag_name
     flags = cond do
-        :A in flags -> MapSet.new([:sn, :l, :p, :s])
+        :A in flags -> MapSet.new([:A, :sn, :l, :p, :s])
         true -> flags
       end
     compile_file(file_name, flags)
@@ -56,10 +56,10 @@ defmodule Nqcc do
     |> Lexer.scan_words()
     |> inspect_output(flags, :l, "\nLexer output")
     |> Parser.parse_program()
+    |> inspect_output(flags, :p, "\nParser output")
 
-    if parser_output != :error do
+    if parser_output != :error and (flags == [] or :A in flags) do
       parser_output
-      |> inspect_output(flags, :p, "\nParser output")
       |> CodeGenerator.generate_code()
       |> inspect_output(flags, :s, "\nCode generator output")
     else
@@ -83,9 +83,11 @@ defmodule Nqcc do
 
   defp print_help_message do
     IO.puts("\nqcc --help file_name \n")
-    IO.puts("\nThe compiler supports following options:\n")
+    IO.puts("\nThe compiler supports the following options:\n")
 
     @commands
     |> Enum.map(fn {command, description} -> IO.puts("  #{command} - #{description}") end)
+
+    :nil
   end
 end
