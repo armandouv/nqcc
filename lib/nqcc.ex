@@ -49,10 +49,8 @@ defmodule Nqcc do
     output
   end
 
-  defp compile_file(file_path, flags) do
-    assembly_path = String.replace_trailing(file_path, ".c", ".s")
-
-    parser_output = File.read!(file_path)
+  def compile_code(code, flags) do
+    parser_output = code
     |> Sanitizer.sanitize_source()
     |> inspect_output(flags, :sn, "\nSanitizer output")
     |> Lexer.scan_words()
@@ -64,7 +62,18 @@ defmodule Nqcc do
       |> inspect_output(flags, :p, "\nParser output")
       |> CodeGenerator.generate_code()
       |> inspect_output(flags, :s, "\nCode generator output")
-      |> Linker.generate_binary(assembly_path)
+    else
+      parser_output
+    end
+  end
+
+  defp compile_file(file_path, flags) do
+    code = File.read!(file_path)
+    compiled_code = compile_code(code, flags)
+
+    if (is_binary(compiled_code)) do
+      assembly_path = String.replace_trailing(file_path, ".c", ".s")
+      Linker.generate_binary(compiled_code, assembly_path)
     end
   end
 
