@@ -72,9 +72,13 @@ defmodule Nqcc do
     compiled_code = compile_code(code, flags)
 
     if (is_binary(compiled_code)) do
-      assembly_path = String.replace_trailing(file_path, ".c", ".s")
-      Linker.generate_binary(compiled_code, assembly_path)
+      link_code(file_path, compiled_code)
     end
+  end
+
+  def link_code(file_path, compiled_code) do
+    assembly_path = String.replace_trailing(file_path, ".c", ".s")
+    Linker.generate_binary(compiled_code, assembly_path)
   end
 
   defp print_help_message do
