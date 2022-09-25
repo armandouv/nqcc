@@ -52,16 +52,16 @@ defmodule Parser do
               {:error, "Error: open brace missed"}
             end
           else
-            {:error, "Error: close parentesis missed"}
+            {:error, "Error: close parenthesis missed"}
           end
         else
-          {:error, "Error: open parentesis missed"}
+          {:error, "Error: open parenthesis missed"}
         end
       else
-        {:error, "Error: main functionb missed"}
+        {:error, "Error: main function missed"}
       end
     else
-      {:error, "Error, return type value missed"}
+      {:error, "Error: return type value missed"}
     end
   end
 
