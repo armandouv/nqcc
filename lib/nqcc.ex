@@ -58,7 +58,7 @@ defmodule Nqcc do
     |> Parser.parse_program()
     |> inspect_output(flags, :p, "\nParser output")
 
-    if parser_output != :error and (flags == [] or :A in flags) do
+    if parser_output != :error do
       parser_output
       |> CodeGenerator.generate_code()
       |> inspect_output(flags, :s, "\nCode generator output")
@@ -71,7 +71,7 @@ defmodule Nqcc do
     code = File.read!(file_path)
     compiled_code = compile_code(code, flags)
 
-    if (is_binary(compiled_code)) do
+    if is_binary(compiled_code) and (flags == [] or :A in flags) do
       link_code(file_path, compiled_code)
     end
   end
