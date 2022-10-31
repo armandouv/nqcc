@@ -49,19 +49,19 @@ defmodule Parser do
                 {_statement_node, remaining_tokens} -> {{:error, "Error: close brace missed"}, remaining_tokens}
               end
             else
-              {:error, "Error: open brace missed"}
+              {{:error, "Error: open brace missed"}, rest}
             end
           else
-            {:error, "Error: close parenthesis missed"}
+            {{:error, "Error: close parenthesis missed"}, rest}
           end
         else
-          {:error, "Error: open parenthesis missed"}
+          {{:error, "Error: open parenthesis missed"}, rest}
         end
       else
-        {:error, "Error: main function missed"}
+        {{:error, "Error: main function missed"}, rest}
       end
     else
-      {:error, "Error: return type value missed"}
+      {{:error, "Error: return type value missed"}, rest}
     end
   end
 
