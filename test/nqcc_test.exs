@@ -67,9 +67,10 @@ defmodule NqccTest do
     assert return_val == expected_return_val;
   end
 
-  defp test_invalid(code) do
-    compiled_code = Nqcc.compile_code(code, [])
-    assert compiled_code == :error
+  defp test_invalid(code, error_stage, error_type) do
+    {out_error_stage, out_error_type, _error_message} = Nqcc.compile_code(code, [])
+    assert out_error_stage == error_stage
+    assert out_error_type == error_type
   end
 
   # Valid
@@ -132,44 +133,64 @@ defmodule NqccTest do
 
   # Invalid
 
-  test "missing paren" do
+  test "close paren missed" do
     code = """
       int main( {
         return 0;
       }
     """
 
-    test_invalid(code)
+    test_invalid(code, :parsing_error, :close_paren_missed)
+  end
+
+  test "open paren missed" do
+    code = """
+      int main ) {
+        return 0;
+      }
+    """
+
+    test_invalid(code, :parsing_error, :open_paren_missed)
   end
 
   test "missing retval" do
     code = """
       int main() {
-        return;
+        return ;
       }
     """
 
-    test_invalid(code)
+    test_invalid(code, :parsing_error, :constant_missed)
   end
 
-  test "no brace" do
+  test "open brace missed" do
+    code = """
+      int main()
+        return 0;
+      }
+    """
+
+    test_invalid(code, :parsing_error, :open_brace_missed)
+  end
+
+  test "close brace missed" do
     code = """
       int main() {
         return 0;
 
     """
 
-    test_invalid(code)
+    test_invalid(code, :parsing_error, :close_brace_missed)
   end
 
-  test "no semicolon" do
+  test "no semicolon on return statement" do
     code = """
       int main() {
         return 0
       }
     """
 
-    test_invalid(code)
+    test_invalid(code, :parsing_error, :return_semicolon_missed)
   end
 
   test "no space on return statement" do
@@ -179,7 +200,7 @@ defmodule NqccTest do
       }
     """
 
-    test_invalid(code)
+    test_invalid(code, :lexing_error, :invalid_token)
   end
 
   test "no space after int keyword" do
@@ -189,7 +210,7 @@ defmodule NqccTest do
       }
     """
 
-    test_invalid(code)
+    test_invalid(code, :lexing_error, :invalid_token)
   end
 
   test "wrong case" do
@@ -199,7 +220,57 @@ defmodule NqccTest do
       }
     """
 
-    test_invalid(code)
+    test_invalid(code, :lexing_error, :invalid_token)
+  end
+
+  test "invalid token after function end" do
+    code = """
+      int main() {
+        return 0;
+      }fads
+    """
+
+    test_invalid(code, :lexing_error, :invalid_token)
+  end
+
+  test "valid token after function end" do
+    code = """
+      int main() {
+        return 0;
+      }432
+    """
+
+    test_invalid(code, :parsing_error, :elements_after_end)
+  end
+
+  test "main function missed" do
+    code = """
+      int () {
+        return 0;
+      }
+    """
+
+    test_invalid(code, :parsing_error, :main_function_missed)
+  end
+
+  test "return type value missed" do
+    code = """
+      main() {
+        return 0;
+      }
+    """
+
+    test_invalid(code, :parsing_error, :return_type_missed)
+  end
+
+  test "return keyword missed" do
+    code = """
+      int main() {
+        0;
+      }
+    """
+
+    test_invalid(code, :parsing_error, :return_missed)
   end
 
 end

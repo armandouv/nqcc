@@ -107,17 +107,4 @@ defmodule LexerTest do
              state[:tokens]
   end
 
-  # tests to fail
-  test "wrong case", state do
-    code = """
-    int main() {
-      RETURN 2;
-    }
-    """
-
-    s_code = Sanitizer.sanitize_source(code)
-
-    expected_result = List.update_at(state[:tokens], 5, fn _ -> :error end)
-    assert Lexer.scan_words(s_code) == expected_result
-  end
 end
