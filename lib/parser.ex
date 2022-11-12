@@ -96,6 +96,13 @@ defmodule Parser do
   def parse_expression([next_token | rest]) do
     case next_token do
       {:constant, value} -> {%AST{node_name: :constant, value: value}, rest}
+      next_token when next_token in [:negation, :logical_negation, :bitwise_complement] ->
+        result = parse_expression(rest)
+        case result do
+          {{:parsing_error, _, _}, _rest} -> result
+          {inner_exp_node, remaining} ->
+            {%AST{node_name: :unary_operator, value: next_token, left_node: inner_exp_node}, remaining}
+        end
       _ -> {{:parsing_error, :constant_missed, "Error: constant value missed"}, rest}
     end
   end
