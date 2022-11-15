@@ -58,13 +58,34 @@ defmodule NqccTest do
     compiled_code = Nqcc.compile_code(code, [])
     assert compiled_code != :error
 
+    # Instead of returning a value, print it so that it can be checked (if returned as a status code it will be restricted
+    # to an 8 bit unsigned integer)
+    compiled_code = """
+      .section	.rodata
+      .LC0:
+        .string	"%d"
+      """
+      <> String.slice(compiled_code, 0..-5) <>
+      """
+        pushq	%rbp
+        movq	%rsp, %rbp
+        movl	%eax, %esi
+        leaq	.LC0(%rip), %rdi
+        movl	$0, %eax
+        call	printf@PLT
+        movl	$0, %eax
+        popq	%rbp
+        ret
+      """
+
     link_status = Nqcc.link_code("my_test.c", compiled_code)
     assert link_status == 0
 
     executable_path = "./my_test"
-    {_, return_val} = System.shell(executable_path)
+    {output, exit_status} = System.shell(executable_path)
     File.rm!(executable_path)
-    assert return_val == expected_return_val;
+    assert exit_status == 0;
+    assert String.to_integer(output) == expected_return_val
   end
 
   defp test_invalid(code, error_stage, error_type) do
@@ -72,6 +93,9 @@ defmodule NqccTest do
     assert out_error_stage == error_stage
     assert out_error_type == error_type
   end
+
+
+  ## Stage 1
 
   # Valid
 
@@ -271,6 +295,124 @@ defmodule NqccTest do
     """
 
     test_invalid(code, :parsing_error, :return_missed)
+  end
+
+
+  ## Stage 2
+
+  # Valid
+
+  test "bitwise" do
+    code = """
+      int main() {
+        return ~12;
+      }
+    """
+
+    test_valid(code, -13)
+  end
+
+  test "bitwise zero" do
+    code = """
+      int main() {
+        return ~0;
+      }
+    """
+
+    test_valid(code, -1)
+  end
+
+  test "neg" do
+    code = """
+      int main() {
+        return -5;
+      }
+    """
+
+    test_valid(code, -5)
+  end
+
+  test "nested ops" do
+    code = """
+      int main() {
+        return !-3;
+      }
+    """
+
+    test_valid(code, 0)
+  end
+
+  test "nested ops 2" do
+    code = """
+      int main() {
+        return -~0;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  test "not 5" do
+    code = """
+      int main() {
+        return !5;
+      }
+    """
+
+    test_valid(code, 0)
+  end
+
+  test "not 0" do
+    code = """
+      int main() {
+        return !0;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  # Invalid
+
+  test "missing const" do
+    code = """
+      int main() {
+        return !;
+      }
+    """
+
+    test_invalid(code, :parsing_error, :constant_missed)
+  end
+
+  test "missing semicolon" do
+    code = """
+      int main() {
+        return !5
+      }
+    """
+
+    test_invalid(code, :parsing_error, :return_semicolon_missed)
+  end
+
+  test "nested missing const" do
+    code = """
+      int main() {
+        return !~;
+      }
+    """
+
+    test_invalid(code, :parsing_error, :constant_missed)
+  end
+
+  test "wrong order" do
+    code = """
+      int main() {
+        return 4-;
+      }
+    """
+
+    # A semicolon is expected after a constant
+    test_invalid(code, :parsing_error, :return_semicolon_missed)
   end
 
 end
