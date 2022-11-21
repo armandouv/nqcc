@@ -2,28 +2,28 @@ defmodule SanitizerTest do
   use ExUnit.Case
   doctest Sanitizer
 
-  test "no spaces", state do
+  test "no spaces" do
     code = """
       intmain(){return2;}
     """
     assert Sanitizer.sanitize_source(code) == ["intmain(){return2;}"]
   end
 
-  test "one space", state do
+  test "one space" do
     code = """
       intmain(){return 2;}
     """
     assert Sanitizer.sanitize_source(code) == ["intmain(){return", "2;}"]
   end
 
-  test "more spaces", state do
+  test "more spaces" do
     code = """
       int main() {return 2;}
     """
     assert Sanitizer.sanitize_source(code) == ["int", "main()", "{return", "2;}"]
   end
 
-  test "newline", state do
+  test "newline" do
     code = """
       intmain()
       {return2;}
@@ -31,7 +31,7 @@ defmodule SanitizerTest do
     assert Sanitizer.sanitize_source(code) == ["intmain()", "{return2;}"]
   end
 
-  test "more newlines", state do
+  test "more newlines" do
     code = """
       int
       main()
@@ -41,7 +41,7 @@ defmodule SanitizerTest do
     assert Sanitizer.sanitize_source(code) == ["int", "main()", "{return", "2;}"]
   end
 
-  test "newlines and spaces", state do
+  test "newlines and spaces" do
     code = """
       int main() {
         return 2;
