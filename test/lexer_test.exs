@@ -134,7 +134,7 @@ defmodule LexerTest do
 
   # Invalid
 
-  test "no space between int and main", state do
+  test "no space between int and main" do
     code = """
       intmain () {
         return 2;
@@ -146,7 +146,7 @@ defmodule LexerTest do
     assert Lexer.scan_words(s_code) == {:lexing_error, :invalid_token, "Invalid token: intmain"}
   end
 
-  test "no space between return and constant", state do
+  test "no space between return and constant" do
     code = """
       int main() {
         return2;
@@ -158,7 +158,7 @@ defmodule LexerTest do
     assert Lexer.scan_words(s_code) == {:lexing_error, :invalid_token, "Invalid token: return2;"}
   end
 
-  test "unknown token after function", state do
+  test "unknown token after function" do
     code = """
       int main() {
         return 2;
