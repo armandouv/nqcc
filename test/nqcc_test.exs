@@ -411,7 +411,463 @@ defmodule NqccTest do
       }
     """
 
-    # A semicolon is expected after a constant
+    test_invalid(code, :parsing_error, :constant_missed)
+  end
+
+
+  ## Stage 3
+
+  # Valid
+
+  test "add" do
+    code = """
+      int main() {
+        return 1 + 2;
+      }
+    """
+
+    test_valid(code, 3)
+  end
+
+  test "associativity" do
+    code = """
+      int main() {
+        return 1 - 2 - 3;
+      }
+    """
+
+    test_valid(code, -4)
+  end
+
+  test "associativity 2" do
+    code = """
+      int main() {
+        return 6 / 3 / 2;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  test "div" do
+    code = """
+      int main() {
+        return 4 / 2;
+      }
+    """
+
+    test_valid(code, 2)
+  end
+
+  test "div neg" do
+    code = """
+      int main() {
+        return (-12) / 5;
+      }
+    """
+
+    test_valid(code, -2)
+  end
+
+  test "div neg no parens" do
+    code = """
+      int main() {
+        return -12 / 5;
+      }
+    """
+
+    test_valid(code, -2)
+  end
+
+  test "div neg outside parens" do
+    code = """
+      int main() {
+        return -(12 / 5);
+      }
+    """
+
+    test_valid(code, -2)
+  end
+
+  test "mult" do
+    code = """
+      int main() {
+        return 2 * 3;
+      }
+    """
+
+    test_valid(code, 6)
+  end
+
+  test "parens" do
+    code = """
+      int main() {
+        return 2 * (3 + 4);
+      }
+    """
+
+    test_valid(code, 14)
+  end
+
+  test "precedence" do
+    code = """
+      int main() {
+        return 2 + 3 * 4;
+      }
+    """
+
+    test_valid(code, 14)
+  end
+
+  test "sub" do
+    code = """
+      int main() {
+        return 1 - 2;
+      }
+    """
+
+    test_valid(code, -1)
+  end
+
+  test "sub neg" do
+    code = """
+      int main() {
+        return 2- -1;
+      }
+    """
+
+    test_valid(code, 3)
+  end
+
+  test "unop add" do
+    code = """
+      int main() {
+        return ~2 + 3;
+      }
+    """
+
+    test_valid(code, 0)
+  end
+
+  test "unop parens" do
+    code = """
+      int main() {
+        return ~(1 + 1);
+      }
+    """
+
+    test_valid(code, -3)
+  end
+
+  # Invalid
+
+  test "malformed paren" do
+    code = """
+      int main() {
+        return 2 (- 3);
+      }
+    """
+
+    # If there's no operator after constant, a semicolon is expected.
+    test_invalid(code, :parsing_error, :return_semicolon_missed)
+  end
+
+  test "missing first op" do
+    code = """
+      int main() {
+        return /3;
+      }
+    """
+
+    test_invalid(code, :parsing_error, :constant_missed)
+  end
+
+  test "missing second op" do
+    code = """
+      int main() {
+        return 1 + ;
+      }
+    """
+
+    test_invalid(code, :parsing_error, :constant_missed)
+  end
+
+  test "no semicolon binary op" do
+    code = """
+      int main() {
+        return 2*2
+      }
+    """
+
+    test_invalid(code, :parsing_error, :return_semicolon_missed)
+  end
+
+
+  ## Stage 4
+
+  # Valid
+
+  test "and false" do
+    code = """
+      int main() {
+        return 1 && 0;
+      }
+    """
+
+    test_valid(code, 0)
+  end
+
+  test "and true" do
+    code = """
+      int main() {
+        return 1 && -1;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  test "eq false" do
+    code = """
+      int main() {
+        return 1 == 2;
+      }
+    """
+
+    test_valid(code, 0)
+  end
+
+  test "eq true" do
+    code = """
+      int main() {
+        return 1 == 1;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  test "ge false" do
+    code = """
+      int main() {
+        return 1 >= 2;
+      }
+    """
+
+    test_valid(code, 0)
+  end
+
+  test "ge true" do
+    code = """
+      int main() {
+        return 3 >= 2;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  test "ge true 2" do
+    code = """
+      int main() {
+        return 2 >= 2;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  test "gt false" do
+    code = """
+      int main() {
+        return 1 > 2;
+      }
+    """
+
+    test_valid(code, 0)
+  end
+
+  test "gt true" do
+    code = """
+      int main() {
+        return 5 > 2;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  test "le false" do
+    code = """
+      int main() {
+        return 3 <= 2;
+      }
+    """
+
+    test_valid(code, 0)
+  end
+
+  test "le true" do
+    code = """
+      int main() {
+        return 1 <= 2;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  test "le true 2" do
+    code = """
+      int main() {
+        return 1 <= 1;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  test "lt false" do
+    code = """
+      int main() {
+        return 7 < 2;
+      }
+    """
+
+    test_valid(code, 0)
+  end
+
+  test "lt true" do
+    code = """
+      int main() {
+        return 1 < 2;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  test "ne false" do
+    code = """
+      int main() {
+        return 0 != 0;
+      }
+    """
+
+    test_valid(code, 0)
+  end
+
+  test "ne true" do
+    code = """
+      int main() {
+        return 1 != 0;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  test "or false" do
+    code = """
+      int main() {
+        return 0 || 0;
+      }
+    """
+
+    test_valid(code, 0)
+  end
+
+  test "or true" do
+    code = """
+      int main() {
+        return 1 || 0;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  test "precedence binops2" do
+    code = """
+      int main() {
+        return 1 || 0 && 2;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  test "precedence binops2 2" do
+    code = """
+      int main() {
+        return (1 || 0) && 0;
+      }
+    """
+
+    test_valid(code, 0)
+  end
+
+  test "precedence binops2 3" do
+    code = """
+      int main() {
+        return 2 == 2 > 0;
+      }
+    """
+
+    test_valid(code, 0)
+  end
+
+  test "precedence binops2 4" do
+    code = """
+      int main() {
+        return 2 == 2 || 0;
+      }
+    """
+
+    test_valid(code, 1)
+  end
+
+  # TODO: Add short circuit tests
+
+  # Invalid
+
+  test "missing first op binops2" do
+    code = """
+      int main() {
+        return <= 2;
+      }
+    """
+
+    test_invalid(code, :parsing_error, :constant_missed)
+  end
+
+  test "missing mid op binops2" do
+    code = """
+      int main() {
+        return 1 < > 3;
+      }
+    """
+
+    test_invalid(code, :parsing_error, :constant_missed)
+  end
+
+  test "missing second op binops2" do
+    code = """
+      int main() {
+        return 2 && ;
+      }
+    """
+
+    test_invalid(code, :parsing_error, :constant_missed)
+  end
+
+  test "missing semicolon binops2" do
+    code = """
+      int main() {
+        return 1 || 2
+      }
+    """
+
     test_invalid(code, :parsing_error, :return_semicolon_missed)
   end
 
