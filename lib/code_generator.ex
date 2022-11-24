@@ -17,6 +17,8 @@ defmodule CodeGenerator do
     end
   end
 
+  @spec emit_code(:constant | :function | :program | :return | :unary_operator, any, any) ::
+          <<_::64, _::_*8>>
   def emit_code(:program, _, code_snippet) do
     """
         .section        .text
