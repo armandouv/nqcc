@@ -50,6 +50,48 @@ defmodule Lexer do
         "main" <> rest ->
           {:main_keyword, rest}
 
+        "~" <> rest ->
+          {:bitwise_complement, rest}
+
+        "-" <> rest ->
+          {:negation, rest}
+
+        "!=" <> rest ->
+          {:not_equal, rest}
+
+        "!" <> rest ->
+          {:logical_negation, rest}
+
+        "+" <> rest ->
+          {:addition, rest}
+
+        "*" <> rest ->
+          {:multiplication, rest}
+
+        "/" <> rest ->
+          {:division, rest}
+
+        "&&" <> rest ->
+          {:and, rest}
+
+        "||" <> rest ->
+          {:or, rest}
+
+        "==" <> rest ->
+          {:equal, rest}
+
+        "<=" <> rest ->
+          {:less_than_or_equal, rest}
+
+        "<" <> rest ->
+          {:less_than, rest}
+
+        ">=" <> rest ->
+          {:greater_than_or_equal, rest}
+
+        ">" <> rest ->
+          {:greater_than, rest}
+
         _ ->
           get_constant(program)
       end

@@ -80,7 +80,7 @@ defmodule Nqcc do
     code = File.read!(file_path)
     compiled_code = compile_code(code, flags)
 
-    if is_binary(compiled_code) and (flags == [] or :A in flags) do
+    if is_binary(compiled_code) and (flags == MapSet.new([]) or :A in flags) do
       link_code(file_path, compiled_code)
     end
   end

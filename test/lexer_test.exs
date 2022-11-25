@@ -14,10 +14,23 @@ defmodule LexerTest do
        {:constant, 2},
        :semicolon,
        :close_brace
-     ]}
+     ],
+     unary_ops_tokens: [
+      :int_keyword,
+      :main_keyword,
+      :open_paren,
+      :close_paren,
+      :open_brace,
+      :return_keyword,
+      :negation,
+      :logical_negation,
+      :bitwise_complement,
+      {:constant, 2},
+      :semicolon,
+      :close_brace
+    ]}
   end
 
-  # tests to pass
   test "return 2", state do
     code = """
       int main() {
@@ -107,4 +120,53 @@ defmodule LexerTest do
              state[:tokens]
   end
 
+  test "unary operators", state do
+    code = """
+      int main() {
+        return -!~2;
+      }
+    """
+
+    s_code = Sanitizer.sanitize_source(code)
+
+    assert Lexer.scan_words(s_code) == state[:unary_ops_tokens]
+  end
+
+  # Invalid
+
+  test "no space between int and main" do
+    code = """
+      intmain () {
+        return 2;
+      }
+    """
+
+    s_code = Sanitizer.sanitize_source(code)
+
+    assert Lexer.scan_words(s_code) == {:lexing_error, :invalid_token, "Invalid token: intmain"}
+  end
+
+  test "no space between return and constant" do
+    code = """
+      int main() {
+        return2;
+      }
+    """
+
+    s_code = Sanitizer.sanitize_source(code)
+
+    assert Lexer.scan_words(s_code) == {:lexing_error, :invalid_token, "Invalid token: return2;"}
+  end
+
+  test "unknown token after function" do
+    code = """
+      int main() {
+        return 2;
+      } vfadsfga
+    """
+
+    s_code = Sanitizer.sanitize_source(code)
+
+    assert Lexer.scan_words(s_code) == {:lexing_error, :invalid_token, "Invalid token: vfadsfga"}
+  end
 end
