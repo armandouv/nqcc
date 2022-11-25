@@ -1,6 +1,13 @@
 defmodule Lexer do
   def scan_words(words) do
-    Enum.flat_map(words, &lex_raw_tokens/1)
+    tokens = Enum.flat_map(words, &lex_raw_tokens/1)
+    result = Enum.reduce_while(tokens, [], fn x, acc ->
+      case x do
+        {:lexing_error, :invalid_token, _} -> {:halt, x}
+        _ -> {:cont, acc ++ [x]}
+      end
+    end)
+    result
   end
 
   def get_constant(program) do
@@ -10,12 +17,12 @@ defmodule Lexer do
 
       _ ->
         IO.puts("Invalid token: #{program}")
-        {:error, ""}
+        {:lexing_error, :invalid_token, "Invalid token: #{program}"}
     end
   end
 
   def lex_raw_tokens(program) when program != "" do
-    {token, rest} =
+    result =
       case program do
         "{" <> rest ->
           {:open_brace, rest}
@@ -43,16 +50,59 @@ defmodule Lexer do
         "main" <> rest ->
           {:main_keyword, rest}
 
+        "~" <> rest ->
+          {:bitwise_complement, rest}
+
+        "-" <> rest ->
+          {:negation, rest}
+
+        "!=" <> rest ->
+          {:not_equal, rest}
+
+        "!" <> rest ->
+          {:logical_negation, rest}
+
+        "+" <> rest ->
+          {:addition, rest}
+
+        "*" <> rest ->
+          {:multiplication, rest}
+
+        "/" <> rest ->
+          {:division, rest}
+
+        "&&" <> rest ->
+          {:and, rest}
+
+        "||" <> rest ->
+          {:or, rest}
+
+        "==" <> rest ->
+          {:equal, rest}
+
+        "<=" <> rest ->
+          {:less_than_or_equal, rest}
+
+        "<" <> rest ->
+          {:less_than, rest}
+
+        ">=" <> rest ->
+          {:greater_than_or_equal, rest}
+
+        ">" <> rest ->
+          {:greater_than, rest}
+
         _ ->
           get_constant(program)
       end
 
-    if token != :error do
-      remaining_tokens = lex_raw_tokens(rest)
-      [token | remaining_tokens]
-    else
-      [:error]
+    case result do
+      {:lexing_error, _, _} -> [result]
+      {token, rest} ->
+        remaining_tokens = lex_raw_tokens(rest)
+        [token | remaining_tokens]
     end
+
   end
 
   def lex_raw_tokens(_program) do

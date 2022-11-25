@@ -34,6 +34,15 @@ defmodule Nqcc do
     compile_file(file_name, flags)
   end
 
+  def is_error({stage_error, error_type, error_message}) when stage_error in [:lexing_error, :parsing_error]
+  and is_atom(error_type) and is_binary(error_message) do
+    true
+  end
+
+  def is_error(_) do
+    false
+  end
+
   def inspect_output(output, flags, target_flag, label) when is_binary(output) do
     if target_flag in flags do
       IO.puts(label <> ":")
@@ -43,7 +52,7 @@ defmodule Nqcc do
   end
 
   def inspect_output(output, flags, target_flag, label) do
-    if target_flag in flags do
+    if not is_error(output) and target_flag in flags do
       IO.inspect(output, label: label)
     end
     output
@@ -58,7 +67,7 @@ defmodule Nqcc do
     |> Parser.parse_program()
     |> inspect_output(flags, :p, "\nParser output")
 
-    if parser_output != :error do
+    if not is_error(parser_output) do
       parser_output
       |> CodeGenerator.generate_code()
       |> inspect_output(flags, :s, "\nCode generator output")
@@ -71,7 +80,7 @@ defmodule Nqcc do
     code = File.read!(file_path)
     compiled_code = compile_code(code, flags)
 
-    if is_binary(compiled_code) and (flags == [] or :A in flags) do
+    if is_binary(compiled_code) and (flags == MapSet.new([]) or :A in flags) do
       link_code(file_path, compiled_code)
     end
   end
