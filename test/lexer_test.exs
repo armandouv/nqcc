@@ -28,7 +28,54 @@ defmodule LexerTest do
       {:constant, 2},
       :semicolon,
       :close_brace
-    ]}
+    ],
+    binary_ops1_tokens: [
+      :int_keyword,
+      :main_keyword,
+      :open_paren,
+      :close_paren,
+      :open_brace,
+      :return_keyword,
+      {:constant, 1},
+      :negation,
+      {:constant, 2},
+      :addition,
+      {:constant, 3},
+      :multiplication,
+      {:constant, 4},
+      :division,
+      {:constant, 5},
+      :semicolon,
+      :close_brace
+    ],
+    binary_ops2_tokens: [
+      :int_keyword,
+      :main_keyword,
+      :open_paren,
+      :close_paren,
+      :open_brace,
+      :return_keyword,
+      {:constant, 1},
+      :and,
+      {:constant, 2},
+      :or,
+      {:constant, 3},
+      :equal,
+      {:constant, 4},
+      :not_equal,
+      {:constant, 5},
+      :less_than,
+      {:constant, 6},
+      :less_than_or_equal,
+      {:constant, 7},
+      :greater_than,
+      {:constant, 8},
+      :greater_than_or_equal,
+      {:constant, 9},
+      :semicolon,
+      :close_brace
+    ]
+  }
   end
 
   test "return 2", state do
@@ -130,6 +177,30 @@ defmodule LexerTest do
     s_code = Sanitizer.sanitize_source(code)
 
     assert Lexer.scan_words(s_code) == state[:unary_ops_tokens]
+  end
+
+  test "binary operators 1", state do
+    code = """
+      int main() {
+        return 1 - 2 + 3 * 4 / 5;
+      }
+    """
+
+    s_code = Sanitizer.sanitize_source(code)
+
+    assert Lexer.scan_words(s_code) == state[:binary_ops1_tokens]
+  end
+
+  test "binary operators 2", state do
+    code = """
+      int main() {
+        return 1 && 2 || 3 == 4 != 5 < 6 <= 7 > 8 >= 9;
+      }
+    """
+
+    s_code = Sanitizer.sanitize_source(code)
+
+    assert Lexer.scan_words(s_code) == state[:binary_ops2_tokens]
   end
 
   # Invalid
